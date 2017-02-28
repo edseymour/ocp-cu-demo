@@ -1,0 +1,9 @@
+[submodule "alm/gogs"]
+	path = alm/gogs
+	url = https://github.com/OpenShiftDemos/gogs-openshift-docker.git
+[submodule "alm/nexus"]
+	path = alm/nexus
+	url = https://github.com/OpenShiftDemos/nexus.git
+[submodule "code"]
+	path = code
+	url = https://github.com/jim-minter/ose3-demos.git
