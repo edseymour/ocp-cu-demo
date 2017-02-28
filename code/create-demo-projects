@@ -1,0 +1,24 @@
+#!/bin/bash
+
+GOGSHOST=$(oc get route gogs -o jsonpath='{.spec.host}' -n alm)
+GITURI=http://${GOGSHOST}/demo/monster.git
+
+NEXUSHOST=$(oc get route nexus -o jsonpath='{.spec.host}' -n alm)
+MAVEN_MIRROR_URL=http://${NEXUSHOST}/repository/maven-all-public
+
+## import JBoss Imagestream
+oc import-image jboss-eap64-openshift --from=registry.access.redhat.com/jboss-eap-6/eap64-openshift:1.4 --confirm -n openshift
+
+## create projects
+oc adm new-project monster-dev --admin=demo --display-name="Monster Developer Project"
+oc adm new-project monster-uat --admin=demo --display-name="Monster UAT Project"
+
+## create custom template in the monster-dev project
+sed 's|%GITURI|'$GITURI'|g' monster-dev.yaml | sed 's|%MAVEN_MIRROR_URL|'$MAVEN_MIRROR_URL'|g' | oc create -n monster-dev -f -
+
+## create template in the monster-uat project
+oc create -f monster-uat.yaml -n monster-uat
+
+## give monster-uat permission to pull monster-dev images
+oc policy add-role-to-user system:image-puller system:serviceaccount:monster-uat:default -n monster-dev
+

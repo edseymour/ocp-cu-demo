@@ -2,7 +2,10 @@
 
 oc new-project alm
 
-oc new-app -f gogs/openshift/gogs-persistent-template.yaml -p SKIP_TLS_VERIFY=true -p HOSTNAME=gogs-alm.$(hostname -i).xip.io
+MYNIC=$(ip r | grep default | awk '{print $5'})
+MYIP=$(ip addr show $MYNIC | grep -Po 'inet \K[\d.]+')
+
+oc new-app -f gogs/openshift/gogs-persistent-template.yaml -p SKIP_TLS_VERIFY=true -p HOSTNAME=gogs-alm.${MYIP}.xip.io
 oc new-app -f nexus/nexus3-persistent-template.yaml 
 
 # confirm hostnames by explicitly requesting them

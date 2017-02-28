@@ -1,0 +1,40 @@
+#!/bin/bash
+
+DOWNLOAD_URL=https://github.com/jim-minter/ose3-demos/archive/master.zip
+
+GOGSHOST=$(oc get route gogs -o jsonpath='{.spec.host}' -n alm)
+GOGSURL=http://${GOGSHOST}
+
+GOGSUSER=demo
+GOGSPASS=r3dh4t
+
+mkdir monster-tmp
+pushd monster-tmp
+
+wget $DOWNLOAD_URL
+unzip master.zip
+
+## create the initial user
+curl -v -H "Content-Type:application/x-www-form-urlencoded" --data "user_name=$GOGSUSER&email=$GOGSUSER%40example.com&password=$GOGSPASS&retype=$GOGSPASS" $GOGSURL/user/sign_up
+
+## create the gogs project
+curl -v -u $GOGSUSER:$GOGSPASS -H "Content-Type: application/json" -X POST -d '{"name":"monster","description":"Ticket Monster","private":false}' $GOGSURL/api/v1/user/repos
+
+cd ose3-demos-master/git/monster/
+git init
+git add .
+
+git config --global user.name "$GOGSUSER"
+git config --global user.email "$GOGSUSER@example.com"
+git config credential.helper 'store --file .git/credentials'
+echo "http://$GOGSUSER:$GOGSPASS@$GOGSHOST" > .git/credentials
+chmod 600 .git/credentials
+
+git commit -am "inital commit for $GOGSUSER"
+git remote add origin $GOGSURL/$GOGSUSER/monster.git
+git push -u origin master
+
+popd
+rm -rf monster-tmp
+
+
