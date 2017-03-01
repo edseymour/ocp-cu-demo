@@ -14,7 +14,7 @@ You're going to need a need a few things to get started:
 * Internet access
 
 # Getting Started
-Make sure you've completed the prerequisites, `git clone` this repo, then to start do the following:
+Make sure you've completed the prerequisites, `git clone --recursive` this repo (the `--recursive` option is required as there are submodules), then to start do the following:
 
 ```
 $ ./ocp-cluster-up
