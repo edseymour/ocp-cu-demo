@@ -1,0 +1,46 @@
+#!/bin/bash
+
+DOWNLOAD=https://github.com/openshift/openshift-ansible/archive/master.zip
+
+VERSION=$(oc version | grep kubernetes.*v | awk '{print $2}')
+MAJORV=$(echo ${VERSION:0:4})
+PLATFORM=rhel
+
+echo "Loading templates for $PLATFORM from examples, version $MAJORV"
+
+function hasplatform()
+{
+   echo $(ls -l *${PLATFORM}*.json | wc -l)
+}
+
+function loadresources()
+{
+	if [[ $(hasplatform) -ne 0 ]]; then
+		for res in *${PLATFORM}*.json; do oc create -n openshift -f $res; done
+	else
+		for res in *.json; do oc create -n openshift -f $res; done
+	fi
+
+}
+
+oc delete templates,is -n openshift --all
+
+mkdir tmp
+pushd tmp
+
+wget ${DOWNLOAD}
+unzip master.zip
+
+pushd openshift-ansible-master/roles/openshift_examples/files/examples/${MAJORV}
+
+for file in *; do
+	if [ -d "${file}" ]; then
+		pushd ${file}
+		loadresources
+		popd
+	fi
+done
+
+popd
+popd
+rm -rf tmp
