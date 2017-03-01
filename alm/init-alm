@@ -12,6 +12,10 @@ oc new-app -f nexus/nexus3-persistent-template.yaml
 nexus_host=$(oc get route nexus -o jsonpath='{.spec.host}')
 gogs_host=$(oc get route gogs -o jsonpath='{.spec.host}') 
 
+# poke the imagestreams
+oc import-image gogs --all
+oc import-image nexus --all
+
 printf "Waiting for Nexus"
 until $(curl --output /dev/null --silent --fail http://$nexus_host/); do
    printf '.'
