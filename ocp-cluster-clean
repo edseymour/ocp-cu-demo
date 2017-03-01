@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if ! [ "$1" = "" ] ; then VERSION=$1 ; else VERSION=latest; fi
+
+read -p "*** Are you sure you want to do this? The OCP-$VERSION cluster will be cleared, all persistent data will be lost. CTRL-C now to stop, Enter to continue."
+
+BASEDIR=/scratch/eseymour/OpenShift
+
+# ensure the cluster is actually down
+sudo oc cluster down
+
+# see issue #13113 https://github.com/openshift/origin/issues/13113
+sudo findmnt -r -n -o TARGET | grep OpenShift/volumes | sudo xargs -r umount
+
+sudo rm -rf ${BASEDIR}/{config,data,volumes,pv}-${VERSION}
+
+
