@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if ! [ "$1" = "" ] ; then VERSION=$1 ; else VERSION=latest; fi
+
+OCP_IMAGE=registry.access.redhat.com/openshift3/ose
+IMAGES=("$OCP_IMAGE" "registry.access.redhat.com/openshift3/ose-docker-registry" "registry.access.redhat.com/openshift3/ose-haproxy-router" "registry.access.redhat.com/openshift3/ose-pod" "registry.access.redhat.com/openshift3/ose-deployer" "registry.access.redhat.com/openshift3/ose-sti-builder" "registry.access.redhat.com/openshift3/ose-docker-builder")
+
+if [[ "$@" = *"--repull"* ]] ; then
+
+  for image in "${IMAGES[@]}"
+  do
+     sudo docker pull ${image}:${VERSION}
+  done
+
+fi
+
+BASEDIR=/scratch/eseymour/OpenShift
+
+[ -e ${BASEDIR}/config-${VERSION}/master/ca.crt ] && CA_EXISTS=1
+
+sudo oc cluster up --use-existing-config \
+              --host-config-dir="${BASEDIR}/config-${VERSION}" \
+              --host-data-dir="${BASEDIR}/data-${VERSION}" \
+              --host-volumes-dir="${BASEDIR}/volumes-${VERSION}" \
+	      --image="${OCP_IMAGE}" \
+	      --version=${VERSION} \
+	      --public-hostname='openshift.demo'
+
+if [ ${CA_EXISTS} -ne 1 ]; then
+	echo "** Adding CA-Trust **"
+	sudo bash -c "cp ${BASEDIR}/config-${VERSION}/master/ca.crt /etc/pki/ca-trust/source/anchors/ ; update-ca-trust"
+fi
+
