@@ -1,0 +1,43 @@
+#!/bin/bash
+
+VERSION=$(oc version | grep openshift.*v | awk '{print $2}')
+IMAGE_VERSION=$(echo ${VERSION:0:4})
+
+DOWNLOADURL=https://raw.githubusercontent.com/openshift/origin-aggregated-logging/enterprise/deployer/deployer.yaml
+LOGGINGURL=$(sudo oc cluster status | grep '^Logging' | grep -E -o 'https?://[^ ]+')
+LOGGINGHOST=$(echo ${LOGGINGURL} | awk -F/ '{print $3}')
+
+oc delete project logging
+
+printf "Waiting for cleanup to complete ."
+while [ $(oc get projects | grep logging | wc -l) -gt 0 ]; do sleep 5; printf '.'; done
+echo "[OK]"
+
+oc adm new-project logging --node-selector=""
+oc project logging
+
+TMPD=$(mktemp -d)
+
+pushd ${TMPD}
+
+wget ${DOWNLOADURL} -O templates.yaml
+oc create -f templates.yaml
+
+oc new-app logging-deployer-account-template
+oc adm policy add-cluster-role-to-user oauth-editor system:serviceaccount:logging:logging-deployer
+oc adm policy add-scc-to-user privileged  system:serviceaccount:logging:aggregated-logging-fluentd 
+oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd 
+oc adm policy add-cluster-role-to-user rolebinding-reader system:serviceaccount:logging:aggregated-logging-elasticsearch
+
+oc create configmap logging-deployer \
+   --from-literal kibana-hostname=${LOGGINGHOST} \
+   --from-literal public-master-url=https://openshift.demo:8443 \
+   --from-literal es-cluster-size=1 \
+   --from-literal es-instance-ram=4G \
+   --from-literal es-pvc-size=10Gi 
+
+oc new-app logging-deployer-template -p IMAGE_VERSION=${IMAGE_VERSION} -p MODE=install
+
+popd
+
+rm -rf ${TMPD}

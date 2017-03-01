@@ -48,6 +48,13 @@ pushd templates
 ./prep-templates
 popd
 
+pushd ocp-services
+
+./fix-logging
+./fix-metrics
+
+popd
+
 pushd alm
 ./init-alm
 popd
