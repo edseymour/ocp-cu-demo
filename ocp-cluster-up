@@ -1,5 +1,8 @@
 #!/bin/bash
 
+BASEDIR=${OCP_BASE}
+if [[ "$BASEDIR" == "" ]] && echo "Please define and export environment variable OCP_BASE with the full path to the location for the cluster's persistent data" && exit 1
+
 if ! [ "$1" = "" ] ; then VERSION=$1 ; else VERSION=latest; fi
 
 OCP_IMAGE=registry.access.redhat.com/openshift3/ose
@@ -14,7 +17,6 @@ if [[ "$@" = *"--repull"* ]] ; then
 
 fi
 
-BASEDIR=/scratch/eseymour/OpenShift
 
 [ -e ${BASEDIR}/config-${VERSION}/master/ca.crt ] && CA_EXISTS=1
 

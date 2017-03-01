@@ -1,10 +1,11 @@
 #!/bin/bash
 
+BASEDIR=${OCP_BASE}
+if [[ "$BASEDIR" == "" ]] && echo "Please define and export environment variable OCP_BASE with the full path to the location for the cluster's persistent data" && exit 1
+
 if ! [ "$1" = "" ] ; then VERSION=$1 ; else VERSION=latest; fi
 
 read -p "*** Are you sure you want to do this? The OCP-$VERSION cluster will be cleared, all persistent data will be lost. CTRL-C now to stop, Enter to continue."
-
-BASEDIR=/scratch/eseymour/OpenShift
 
 # ensure the cluster is actually down
 sudo oc cluster down
