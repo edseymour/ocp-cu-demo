@@ -1,7 +1,12 @@
 #!/bin/bash 
 
-BASEDIR=$1
-[[ "${BASEDIR}" == "" ]] && echo "ERROR: please provide full path to base directory" && exit 1
+CONFROOT=$1
+[[ "${CONFROOT}" == "" ]] && echo "ERROR: please provide full path to base directory" && exit 1
+
+VERSION=$2
+[[ "${VERSION}" == "" ]] && VERSION=latest
+
+BASEDIR=${CONFROOT}/pv-${VERSION}
 
 echo "*** Creating 20x hostPath PVs in ${BASEDIR}"
 echo "*** Assuming user has current oc context logged in, with cluster-admin role"
