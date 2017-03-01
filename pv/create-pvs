@@ -13,7 +13,7 @@ echo "*** Assuming user has current oc context logged in, with cluster-admin rol
 echo "*** This script uses sudo, you may need to provide your password to continue"
 
 sudo mkdir -p ${BASEDIR}/pv{1..20}
-sudo chmod a+w ${BASEDIR}/pv{1..20}
+sudo chmod a+w -R ${BASEDIR}
 sudo chcon -Rt svirt_sandbox_file_t ${BASEDIR}
 
 sizes=(512Mi 1Gi 10Gi)

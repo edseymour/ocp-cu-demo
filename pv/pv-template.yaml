@@ -10,5 +10,5 @@ spec:
       - ReadWriteOnce
     persistentVolumeReclaimPolicy: Recycle
     hostPath:
-      path: /scratch/eseymour/OpenShift/pv/%pv
+      path: %basedir/%pv
 
