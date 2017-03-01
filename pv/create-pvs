@@ -24,7 +24,7 @@ do
    size=${sizes[$si]}
    pv=pv$vol
   
-   sed s/%pv/$pv/g pv-template.yaml | sed s/%basedir/${BASEDIR}/g | sed s/%size/$size/g | oc create -f -
+   sed s/%pv/$pv/g pv-template.yaml | sed s|%basedir|${BASEDIR}|g | sed s/%size/$size/g | oc create -f -
 
    si=$(($si+1))
    [[ $si -ge 3 ]] && si=0

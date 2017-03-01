@@ -24,6 +24,8 @@ sudo oc cluster up --use-existing-config \
               --host-volumes-dir="${BASEDIR}/volumes-${VERSION}" \
 	      --image="${OCP_IMAGE}" \
 	      --version=${VERSION} \
+	      --metrics=true \
+	      --logging=true \
 	      --public-hostname='openshift.demo'
 
 if [ ${CA_EXISTS} -ne 1 ]; then
@@ -31,3 +33,24 @@ if [ ${CA_EXISTS} -ne 1 ]; then
 	sudo bash -c "cp ${BASEDIR}/config-${VERSION}/master/ca.crt /etc/pki/ca-trust/source/anchors/ ; update-ca-trust"
 fi
 
+sudo oc login -u system:admin
+sudo oc adm policy add-cluster-role-to-user cluster-admin admin
+
+oc login --username=admin --password=admin https://openshift.demo:8443
+
+pushd pv
+./create-pvs ${BASEDIR} ${VERSION}
+popd
+
+pushd templates
+./prep-templates
+popd
+
+pushd alm
+./init-alm
+popd
+
+pushd code
+./create-demo-resources
+./create-demo-projects
+popd
