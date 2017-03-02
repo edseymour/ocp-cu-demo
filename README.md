@@ -1,3 +1,5 @@
+# Deprecated
+Please see https://github.com/openshift-evangelists/oc-cluster-wrapper
 # ocp-cu-demo
 Scripts to automate oc cluster up to build an OpenShift Container Platform demo, with accompanying content.
 
